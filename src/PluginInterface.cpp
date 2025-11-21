@@ -1,4 +1,4 @@
-#include "DepositWithdrawalReportInterface.hpp"
+#include "PluginInterface.hpp"
 
 #include <iomanip>
 
