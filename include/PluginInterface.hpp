@@ -6,7 +6,7 @@
 #include <atomic>
 #include <string>
 #include "Structures.hpp"
-#include "ast/ast.hpp"
+#include "ast/Ast.hpp"
 
 extern "C" {
     void AboutReport(rapidjson::Value& request,
