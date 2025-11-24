@@ -44,6 +44,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
+    std::cout << "Group mask: " << group_mask << std::endl;
+    std::cout << "from: " << from << std::endl;
+    std::cout << "to: " << to << std::endl;
+
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
 
