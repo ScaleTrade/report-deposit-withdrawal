@@ -21,6 +21,4 @@ extern "C" {
                      rapidjson::Value& response,
                      rapidjson::Document::AllocatorType& allocator,
                      CServerInterface* server);
-
-    void LogJSON(const rapidjson::Value& value);
 }

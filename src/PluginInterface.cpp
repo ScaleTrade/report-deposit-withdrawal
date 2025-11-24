@@ -96,14 +96,24 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
         for (const auto& trade : trades_vector) {
             if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
+                AccountRecord account;
+
+                server->GetAccountByLogin(trade.login, &account);
+
+                std::string currency = get_group_currency(account.group);
+
+                auto& total = totals_map[currency];
+                total.currency = currency;
+                total.balance += trade.profit;
+
                 tbody_rows.push_back(tr({
                     td({div({text(std::to_string(trade.order))})}),
                     td({div({text(std::to_string(trade.login))})}),
-                    td({div({text("NAME")})}),
+                    td({div({text(account.name)})}),
                     td({div({text(std::to_string(trade.timestamp))})}),
                     td({div({text(trade.comment)})}),
                     td({div({text(format_for_AST(trade.profit))})}),
-                    td({div({text("CURRENCY")})}),
+                    td({div({text(currency)})}),
                 }));
             }
         }
@@ -121,10 +131,4 @@ extern "C" void CreateReport(rapidjson::Value& request,
     });
 
     utils::CreateUI(report, response, allocator);
-}
-
-void LogJSON(const rapidjson::Value& value) {
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    value.Accept(writer);
 }
