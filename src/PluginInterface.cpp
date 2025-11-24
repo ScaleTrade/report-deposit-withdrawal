@@ -48,7 +48,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     std::vector<GroupRecord> groups_vector;
 
     try {
-        server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
+        server->GetCloseTradesByGroup(group_mask, from, to, &trades_vector);
         server->GetAllGroups(&groups_vector);
     } catch (const std::exception& e) {
         std::cout << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
