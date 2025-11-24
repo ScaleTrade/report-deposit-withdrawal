@@ -94,6 +94,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             th({div({text("Currency")})}),
         }));
 
+        // Tbody
         for (const auto& trade : trades_vector) {
             if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
                 AccountRecord account;
@@ -116,6 +117,31 @@ extern "C" void CreateReport(rapidjson::Value& request,
                     td({div({text(currency)})}),
                 }));
             }
+        }
+
+        // Tfoot
+        tfoot_rows.push_back(tr({
+            td({div({text("TOTAL:")})}),
+            td({div({text("")})}),
+            td({div({text("")})}),
+            td({div({text("")})}),
+            td({div({text("")})}),
+            td({div({text("")})}),
+            td({div({text("")})})
+        }));
+
+        for (const auto& pair : totals_map) {
+            const Total& total = pair.second;
+
+            tfoot_rows.push_back(tr({
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text("")})}),
+                td({div({text(format_for_AST(total.balance))})}),
+                td({div({text(total.currency)})}),
+            }));
         }
 
         return table({
