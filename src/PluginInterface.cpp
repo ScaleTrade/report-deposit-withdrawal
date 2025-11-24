@@ -44,10 +44,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
-    std::cout << "Group mask: " << group_mask << std::endl;
-    std::cout << "from: " << from << std::endl;
-    std::cout << "to: " << to << std::endl;
-
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
 
@@ -57,9 +53,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
     } catch (const std::exception& e) {
         std::cout << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
     }
-
-    std::cout << "Trades size: " << trades_vector.size() << std::endl;
-    std::cout << "Groups size: " << groups_vector.size() << std::endl;
 
     // Лямбда для поиска валюты аккаунта по группе
     auto get_group_currency = [&](const std::string& group_name) -> std::string {
