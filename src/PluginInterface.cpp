@@ -87,6 +87,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
             th({div({text("Currency")})}),
         }));
 
+        // тест
+        tbody_rows.push_back(tr({
+            td({div({text("test")})}),
+            td({div({text("test")})}),
+            td({div({text("test")})}),
+            td({div({text("test")})}),
+            td({div({text("test")})}),
+            td({div({text("test")})}),
+            td({div({text("CURRENCY")})}),
+        }));
+
         for (const auto& trade : trades_vector) {
             if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
                 tbody_rows.push_back(tr({
