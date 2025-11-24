@@ -44,6 +44,9 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
+    std::cout << "Request: " << std::endl;
+    LogJSON(request);
+
     std::cout << "Group mask: " << group_mask << std::endl;
     std::cout << "from: " << from << std::endl;
     std::cout << "to: " << to << std::endl;
@@ -132,4 +135,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
     });
 
     utils::CreateUI(report, response, allocator);
+}
+
+void LogJSON(const rapidjson::Value& value) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    value.Accept(writer);
 }
