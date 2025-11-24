@@ -95,17 +95,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }));
 
         for (const auto& trade : trades_vector) {
-            // if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
-            //     tbody_rows.push_back(tr({
-            //         td({div({text(std::to_string(trade.order))})}),
-            //         td({div({text(std::to_string(trade.login))})}),
-            //         td({div({text("NAME")})}),
-            //         td({div({text(std::to_string(trade.timestamp))})}),
-            //         td({div({text(trade.comment)})}),
-            //         td({div({text(format_for_AST(trade.profit))})}),
-            //         td({div({text("CURRENCY")})}),
-            //     }));
-            // }
+            if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
+                tbody_rows.push_back(tr({
+                    td({div({text(std::to_string(trade.order))})}),
+                    td({div({text(std::to_string(trade.login))})}),
+                    td({div({text("NAME")})}),
+                    td({div({text(std::to_string(trade.timestamp))})}),
+                    td({div({text(trade.comment)})}),
+                    td({div({text(format_for_AST(trade.profit))})}),
+                    td({div({text("CURRENCY")})}),
+                }));
+            }
         }
 
         return table({
