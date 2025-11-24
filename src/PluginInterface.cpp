@@ -34,7 +34,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     std::string group_mask;
     int from;
     int to;
-    if (request.HasMember("group") && request["group"].IsNumber()) {
+    if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
     if (request.HasMember("from") && request["from"].IsNumber()) {
