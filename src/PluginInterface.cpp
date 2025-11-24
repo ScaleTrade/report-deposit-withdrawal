@@ -52,7 +52,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
     std::vector<GroupRecord> groups_vector;
 
     try {
-        server->GetCloseTradesByGroup(group_mask, from, to, &trades_vector);
+        server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
         server->GetAllGroups(&groups_vector);
     } catch (const std::exception& e) {
         std::cout << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
@@ -95,15 +95,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         }));
 
         for (const auto& trade : trades_vector) {
-            tbody_rows.push_back(tr({
-                td({div({text(std::to_string(trade.order))})}),
-                td({div({text(std::to_string(trade.login))})}),
-                td({div({text("NAME")})}),
-                td({div({text(std::to_string(trade.timestamp))})}),
-                td({div({text(trade.comment)})}),
-                td({div({text(format_for_AST(trade.profit))})}),
-                td({div({text("CURRENCY")})}),
-            }));
             // if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
             //     tbody_rows.push_back(tr({
             //         td({div({text(std::to_string(trade.order))})}),
