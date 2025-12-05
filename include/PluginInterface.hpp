@@ -7,6 +7,7 @@
 #include <string>
 #include "Structures.hpp"
 #include "ast/Ast.hpp"
+#include "sbxTableBuilder/SBXTableBuilder.hpp"
 #include "Utils.hpp"
 
 extern "C" {
