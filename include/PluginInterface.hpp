@@ -8,7 +8,7 @@
 #include "Structures.hpp"
 #include "ast/Ast.hpp"
 #include "sbxTableBuilder/SBXTableBuilder.hpp"
-#include "Utils.hpp"
+#include "src/utils/Utils.hpp"
 
 extern "C" {
     void AboutReport(rapidjson::Value& request,

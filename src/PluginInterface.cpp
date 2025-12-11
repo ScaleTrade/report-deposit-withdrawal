@@ -23,12 +23,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
                              rapidjson::Value& response,
                              rapidjson::Document::AllocatorType& allocator,
                              CServerInterface* server) {
-    // Структура накопления итогов
-    struct Total {
-        double balance;
-        std::string currency;
-    };
-
     std::string group_mask;
     int from;
     int to;
@@ -42,7 +36,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
-    std::unordered_map<std::string, Total> totals_map;
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
     double usd_total_profit = 0;
