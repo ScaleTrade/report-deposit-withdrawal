@@ -29,8 +29,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::string currency;
     };
 
-    std::unordered_map<std::string, Total> totals_map;
-
     std::string group_mask;
     int from;
     int to;
@@ -44,8 +42,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         to = request["to"].GetInt();
     }
 
+    std::unordered_map<std::string, Total> totals_map;
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
+    double usd_total_profit = 0;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
@@ -71,81 +71,6 @@ extern "C" void CreateReport(rapidjson::Value& request,
         return oss.str();
     };
 
-    // v.1
-    // auto make_table = [&](const std::vector<TradeRecord>& trades) -> Node {
-    //     std::vector<Node> thead_rows;
-    //     std::vector<Node> tbody_rows;
-    //     std::vector<Node> tfoot_rows;
-    //
-    //     // Thead
-    //     thead_rows.push_back(tr({
-    //         th({div({text("Order")})}),
-    //         th({div({text("Login")})}),
-    //         th({div({text("Name")})}),
-    //         th({div({text("Time")})}),
-    //         th({div({text("Comment")})}),
-    //         th({div({text("Amount")})}),
-    //         th({div({text("Currency")})}),
-    //     }));
-    //
-    //     // Tbody
-    //     for (const auto& trade : trades_vector) {
-    //         if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
-    //             AccountRecord account;
-    //
-    //             server->GetAccountByLogin(trade.login, &account);
-    //
-    //             std::string currency = get_group_currency(account.group);
-    //
-    //             auto& total = totals_map[currency];
-    //             total.currency = currency;
-    //             total.balance += trade.profit;
-    //
-    //             tbody_rows.push_back(tr({
-    //                 td({div({text(std::to_string(trade.order))})}),
-    //                 td({div({text(std::to_string(trade.login))})}),
-    //                 td({div({text(account.name)})}),
-    //                 td({div({text(utils::FormatTimestampToString(trade.close_time))})}),
-    //                 td({div({text(trade.comment)})}),
-    //                 td({div({text(format_double_for_AST(trade.profit))})}),
-    //                 td({div({text(currency)})}),
-    //             }));
-    //         }
-    //     }
-    //
-    //     // Tfoot
-    //     tfoot_rows.push_back(tr({
-    //         td({div({text("TOTAL:")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})}),
-    //         td({div({text("")})})
-    //     }));
-    //
-    //     for (const auto& pair : totals_map) {
-    //         const Total& total = pair.second;
-    //
-    //         tfoot_rows.push_back(tr({
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text("")})}),
-    //             td({div({text(format_double_for_AST(total.balance))})}),
-    //             td({div({text(total.currency)})}),
-    //         }));
-    //     }
-    //
-    //     return table({
-    //         thead(thead_rows),
-    //         tbody(tbody_rows),
-    //         tfoot(tfoot_rows),
-    //     }, props({{"className", "table"}}));
-    // };
-
-    // v.2
     TableBuilder table_builder("DepositWithdrawalReportTable");
 
     table_builder.SetIdColumn("order");
@@ -153,6 +78,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableRefreshButton(false);
     table_builder.EnableBookmarksButton(false);
     table_builder.EnableExportButton(true);
+    table_builder.EnableTotal(true);
+    table_builder.SetTotalDataTitle("TOTAL");
 
     table_builder.AddColumn({"order", "ORDER"});
     table_builder.AddColumn({"login", "LOGIN"});
@@ -173,20 +100,19 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             std::string currency = get_group_currency(account.group);
+            double multiplier;
 
-            auto& total = totals_map[currency];
-            total.currency = currency;
-            total.balance += trade.profit;
+            if (currency == "USD") {
+                usd_total_profit += trade.profit;
+            } else {
+                try {
+                    server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
+                } catch (const std::exception& e) {
+                    std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+                }
 
-            //             tbody_rows.push_back(tr({
-            //                 td({div({text(std::to_string(trade.order))})}),
-            //                 td({div({text(std::to_string(trade.login))})}),
-            //                 td({div({text(account.name)})}),
-            //                 td({div({text(utils::FormatTimestampToString(trade.close_time))})}),
-            //                 td({div({text(trade.comment)})}),
-            //                 td({div({text(format_double_for_AST(trade.profit))})}),
-            //                 td({div({text(currency)})}),
-            //             }));
+                usd_total_profit += trade.profit * multiplier;
+            }
 
             table_builder.AddRow({
                 {"order", std::to_string(trade.order)},
@@ -194,11 +120,17 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 {"name", account.name},
                 {"close_time", utils::FormatTimestampToString(trade.close_time)},
                 {"comment", trade.comment},
-                {"profit", format_double_for_AST(trade.profit)},
+                {"profit", format_double_for_AST(trade.profit * multiplier)},
                 {"name", currency}
             });
         }
     }
+
+    // Total row
+    JSONArray totals_array;
+    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}});
+
+    table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
     const Node table_node = Table({}, table_props);
