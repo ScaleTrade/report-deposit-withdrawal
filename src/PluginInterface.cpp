@@ -121,7 +121,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 {"close_time", utils::FormatTimestampToString(trade.close_time)},
                 {"comment", trade.comment},
                 {"profit", format_double_for_AST(trade.profit * multiplier)},
-                {"name", currency}
+                {"name", "USD"}
             });
         }
     }
