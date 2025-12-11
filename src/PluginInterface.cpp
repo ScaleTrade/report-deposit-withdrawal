@@ -108,7 +108,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 try {
                     server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
                 } catch (const std::exception& e) {
-                    std::cerr << "[CreditFacilityReportInterface]: " << e.what() << std::endl;
+                    std::cerr << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
                 }
 
                 usd_total_profit += trade.profit * multiplier;
