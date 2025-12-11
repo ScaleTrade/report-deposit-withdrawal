@@ -100,7 +100,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
             }
 
             std::string currency = get_group_currency(account.group);
-            double multiplier;
+            double multiplier = 1;
 
             if (currency == "USD") {
                 usd_total_profit += trade.profit;
@@ -128,7 +128,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit", usd_total_profit}});
+    totals_array.emplace_back(JSONObject{{"profit",  usd_total_profit}});
 
     table_builder.SetTotalData(totals_array);
 
