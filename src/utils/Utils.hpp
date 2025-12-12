@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <string>
 #include <ctime>
 #include <iomanip>
@@ -12,5 +13,9 @@ namespace utils {
               rapidjson::Value& response,
               rapidjson::Document::AllocatorType& allocator);
 
-    std::string FormatTimestampToString(const time_t timestamp);
+    std::string FormatTimestampToString(const time_t& timestamp);
+
+    double TruncateDouble(const double& value, const int& digits);
+
+    std::string GetGroupCurrencyByName(const std::vector<GroupRecord>& group_vector, const std::string& group_name);
 }
