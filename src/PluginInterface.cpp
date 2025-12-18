@@ -51,6 +51,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     table_builder.SetIdColumn("order");
     table_builder.SetOrderBy("order", "DESC");
+    table_builder.EnableAutoSave(false);
     table_builder.EnableRefreshButton(false);
     table_builder.EnableBookmarksButton(false);
     table_builder.EnableExportButton(true);
