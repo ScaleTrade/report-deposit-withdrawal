@@ -5,10 +5,10 @@
 #include <thread>
 #include <atomic>
 #include <string>
-#include "Structures.hpp"
+#include "Structures.h"
 #include "ast/Ast.hpp"
 #include "sbxTableBuilder/SBXTableBuilder.hpp"
-#include "utils/Utils.hpp"
+#include "utils/Utils.h"
 
 extern "C" {
     void AboutReport(rapidjson::Value& request,
