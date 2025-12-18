@@ -118,6 +118,4 @@ extern "C" void CreateReport(rapidjson::Value& request,
     });
 
     utils::CreateUI(report, response, allocator);
-
-    std::cout << "[DepositWithdrawalReportInterface]: Data sent" << std::endl;
 }
