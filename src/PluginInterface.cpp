@@ -4,28 +4,32 @@
 
 using namespace ast;
 
-extern "C" void AboutReport(rapidjson::Value& request,
-                            rapidjson::Value& response,
+extern "C" void AboutReport(rapidjson::Value&                   request,
+                            rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
-                            CServerInterface* server) {
+                            CServerInterface*                   server) {
     response.AddMember("version", 1, allocator);
-    response.AddMember("name", Value().SetString("Deposit Withdrawal report", allocator), allocator);
-    response.AddMember("description",
-        Value().SetString("Balance operations performed on trading accounts over the selected period. "
-                          "Includes transaction ID, date, amount, and account details.",
-             allocator), allocator);
+    response.AddMember(
+        "name", Value().SetString("Deposit Withdrawal report", allocator), allocator);
+    response.AddMember(
+        "description",
+        Value().SetString(
+            "Balance operations performed on trading accounts over the selected period. "
+            "Includes transaction ID, date, amount, and account details.",
+            allocator),
+        allocator);
     response.AddMember("type", REPORT_RANGE_GROUP_TYPE, allocator);
 }
 
 extern "C" void DestroyReport() {}
 
-extern "C" void CreateReport(rapidjson::Value& request,
-                             rapidjson::Value& response,
+extern "C" void CreateReport(rapidjson::Value&                   request,
+                             rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
-                             CServerInterface* server) {
+                             CServerInterface*                   server) {
     std::string group_mask;
-    int from;
-    int to;
+    int         from;
+    int         to;
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
@@ -38,7 +42,7 @@ extern "C" void CreateReport(rapidjson::Value& request,
 
     std::vector<TradeRecord> trades_vector;
     std::vector<GroupRecord> groups_vector;
-    double usd_total_profit = 0;
+    double                   usd_total_profit = 0;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
@@ -47,8 +51,10 @@ extern "C" void CreateReport(rapidjson::Value& request,
         std::cout << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
     }
 
+    // Main table
     TableBuilder table_builder("DepositWithdrawalReportTable");
 
+    // Table props
     table_builder.SetIdColumn("order");
     table_builder.SetOrderBy("order", "DESC");
     table_builder.EnableAutoSave(false);
@@ -58,13 +64,21 @@ extern "C" void CreateReport(rapidjson::Value& request,
     table_builder.EnableTotal(true);
     table_builder.SetTotalDataTitle("TOTAL");
 
-    table_builder.AddColumn({"order", "ORDER", 1});
-    table_builder.AddColumn({"login", "LOGIN", 2});
-    table_builder.AddColumn({"name", "name", 3});
-    table_builder.AddColumn({"close_time", "TIME", 4});
-    table_builder.AddColumn({"comment", "COMMENT", 5});
-    table_builder.AddColumn({"profit", "AMOUNT", 6});
-    table_builder.AddColumn({"currency", "CURRENCY", 7});
+    // Filters
+    FilterConfig search_filter;
+    search_filter.type = FilterType::Search;
+
+    FilterConfig date_time_filter;
+    date_time_filter.type = FilterType::DateTime;
+
+    // Columns
+    table_builder.AddColumn({"order", "ORDER", 1, search_filter});
+    table_builder.AddColumn({"login", "LOGIN", 2, search_filter});
+    table_builder.AddColumn({"name", "name", 3, search_filter});
+    table_builder.AddColumn({"close_time", "CLOSE_TIME", 4, date_time_filter});
+    table_builder.AddColumn({"comment", "COMMENT", 5, search_filter});
+    table_builder.AddColumn({"profit", "AMOUNT", 6, search_filter});
+    table_builder.AddColumn({"currency", "CURRENCY", 7, search_filter});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
@@ -76,8 +90,8 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 std::cout << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
             }
 
-            std::string currency = utils::GetGroupCurrencyByName(groups_vector, account.group);
-            double multiplier = 1;
+            std::string currency   = utils::GetGroupCurrencyByName(groups_vector, account.group);
+            double      multiplier = 1;
 
             if (currency == "USD") {
                 usd_total_profit += trade.profit;
@@ -91,31 +105,27 @@ extern "C" void CreateReport(rapidjson::Value& request,
                 usd_total_profit += trade.profit * multiplier;
             }
 
-            table_builder.AddRow({
-                utils::TruncateDouble(trade.order, 0),
-                utils::TruncateDouble(trade.login, 0),
-                account.name,
-                utils::FormatTimestampToString(trade.close_time),
-                trade.comment,
-                utils::TruncateDouble(trade.profit * multiplier, 2),
-                "USD"
-            });
+            table_builder.AddRow({utils::TruncateDouble(trade.order, 0),
+                                  utils::TruncateDouble(trade.login, 0),
+                                  account.name,
+                                  utils::FormatTimestampToString(trade.close_time),
+                                  trade.comment,
+                                  utils::TruncateDouble(trade.profit * multiplier, 2),
+                                  "USD"});
         }
     }
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(JSONObject{{"profit",  utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
+    totals_array.emplace_back(
+        JSONObject{{"profit", utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
 
     table_builder.SetTotalData(totals_array);
 
     const JSONObject table_props = table_builder.CreateTableProps();
-    const Node table_node = Table({}, table_props);
+    const Node       table_node  = Table({}, table_props);
 
-    const Node report = div({
-        h1({ text("Deposit Withdrawal Report") }),
-        table_node
-    });
+    const Node report = div({h1({text("Deposit Withdrawal Report")}), table_node});
 
     utils::CreateUI(report, response, allocator);
 }
