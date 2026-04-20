@@ -7,7 +7,7 @@ using namespace ast;
 extern "C" void AboutReport(rapidjson::Value&                   request,
                             rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
-                            CServerInterface*                   server) {
+                            ReportServerInterface*              server) {
     response.AddMember("version", 1, allocator);
     response.AddMember(
         "name", Value().SetString("Deposit Withdrawal report", allocator), allocator);
@@ -18,7 +18,8 @@ extern "C" void AboutReport(rapidjson::Value&                   request,
             "Includes transaction ID, date, amount, and account details.",
             allocator),
         allocator);
-    response.AddMember("type", REPORT_RANGE_GROUP_TYPE, allocator);
+    response.AddMember("type", static_cast<int>(ReportType::RangeGroup), allocator);
+    response.AddMember("key", Value().SetString("DEPOSIT_WITHDRAWAL_REPORT", allocator), allocator);
 }
 
 extern "C" void DestroyReport() {}
@@ -26,7 +27,7 @@ extern "C" void DestroyReport() {}
 extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
-                             CServerInterface*                   server) {
+                             ReportServerInterface*              server) {
     std::string group_mask;
     int         from;
     int         to;
@@ -40,9 +41,9 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
         to = request["to"].GetInt();
     }
 
-    std::vector<TradeRecord> trades_vector;
-    std::vector<GroupRecord> groups_vector;
-    double                   usd_total_profit = 0;
+    std::vector<ReportTradeRecord> trades_vector;
+    std::vector<ReportGroupRecord> groups_vector;
+    double                         usd_total_profit = 0;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
@@ -81,8 +82,9 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     table_builder.AddColumn({"currency", "CURRENCY", 7, search_filter});
 
     for (const auto& trade : trades_vector) {
-        if (trade.cmd == OP_BALANCE_IN || trade.cmd == OP_BALANCE_OUT) {
-            AccountRecord account;
+        if (trade.cmd == ReportTradeCommand::BalanceIn ||
+            trade.cmd == ReportTradeCommand::BalanceOut) {
+            ReportAccountRecord account;
 
             try {
                 server->GetAccountByLogin(trade.login, &account);
@@ -97,7 +99,8 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                 usd_total_profit += trade.profit;
             } else {
                 try {
-                    server->CalculateConvertRateByCurrency(currency, "USD", trade.cmd, &multiplier);
+                    server->CalculateConvertRateByCurrency(
+                        currency, "USD", static_cast<int>(trade.cmd), &multiplier);
                 } catch (const std::exception& e) {
                     std::cerr << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
                 }
