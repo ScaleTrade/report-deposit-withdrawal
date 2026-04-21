@@ -75,11 +75,12 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     // Columns
     table_builder.AddColumn({"order", "ORDER", 1, search_filter});
     table_builder.AddColumn({"login", "LOGIN", 2, search_filter});
-    table_builder.AddColumn({"name", "name", 3, search_filter});
-    table_builder.AddColumn({"close_time", "CLOSE_TIME", 4, date_time_filter});
-    table_builder.AddColumn({"comment", "COMMENT", 5, search_filter});
-    table_builder.AddColumn({"profit", "AMOUNT", 6, search_filter});
-    table_builder.AddColumn({"currency", "CURRENCY", 7, search_filter});
+    table_builder.AddColumn({"name", "NAME", 3, search_filter});
+    table_builder.AddColumn({"type", "TYPE", 4, search_filter});
+    table_builder.AddColumn({"close_time", "CLOSE_TIME", 5, date_time_filter});
+    table_builder.AddColumn({"comment", "COMMENT", 6, search_filter});
+    table_builder.AddColumn({"profit", "AMOUNT", 7, search_filter});
+    table_builder.AddColumn({"currency", "CURRENCY", 8, search_filter});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == ReportTradeCommand::BalanceIn ||
@@ -111,6 +112,7 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
             table_builder.AddRow({utils::TruncateDouble(trade.order, 0),
                                   utils::TruncateDouble(trade.login, 0),
                                   account.name,
+                                  utils::ConvertCmdToString(static_cast<int>(trade.cmd)),
                                   utils::FormatTimestampToString(trade.close_time),
                                   trade.comment,
                                   utils::TruncateDouble(trade.profit * multiplier, 2),
