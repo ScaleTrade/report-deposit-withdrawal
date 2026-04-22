@@ -31,6 +31,7 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     std::string group_mask;
     int         from;
     int         to;
+
     if (request.HasMember("group") && request["group"].IsString()) {
         group_mask = request["group"].GetString();
     }
@@ -41,9 +42,9 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
         to = request["to"].GetInt();
     }
 
-    std::vector<ReportTradeRecord> trades_vector;
-    std::vector<ReportGroupRecord> groups_vector;
-    double                         usd_total_profit = 0;
+    std::vector<ReportTradeRecord>          trades_vector;
+    std::vector<ReportGroupRecord>          groups_vector;
+    std::unordered_map<std::string, double> total_profit_map;
 
     try {
         server->GetTransactionsByGroup(group_mask, from, to, &trades_vector);
@@ -81,7 +82,7 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     table_builder.AddColumn({"comment", "COMMENT", 6, search_filter});
     table_builder.AddColumn({"profit", "AMOUNT", 7, search_filter});
     table_builder.AddColumn({"currency", "CURRENCY", 8, search_filter});
-    table_builder.AddColumn({"group", "GROUP", 8, search_filter});
+    table_builder.AddColumn({"group", "GROUP", 9, search_filter});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == ReportTradeCommand::BalanceIn ||
@@ -97,18 +98,17 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
             std::string currency   = utils::GetGroupCurrencyByName(groups_vector, account.group);
             double      multiplier = 1;
 
-            if (currency == "USD") {
-                usd_total_profit += trade.profit;
-            } else {
-                try {
-                    server->CalculateConvertRateByCurrency(
-                        currency, "USD", static_cast<int>(trade.cmd), &multiplier);
-                } catch (const std::exception& e) {
-                    std::cerr << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
-                }
+            // Conversion disabled
+            // if (currency == "USD") {
+            //     try {
+            //         server->CalculateConvertRateByCurrency(
+            //             currency, "USD", static_cast<int>(trade.cmd), &multiplier);
+            //     } catch (const std::exception& e) {
+            //         std::cerr << "[DepositWithdrawalReportInterface]: " << e.what() << std::endl;
+            //     }
+            // }
 
-                usd_total_profit += trade.profit * multiplier;
-            }
+            total_profit_map[currency] += trade.profit * multiplier;
 
             table_builder.AddRow({utils::TruncateDouble(trade.order, 0),
                                   utils::TruncateDouble(trade.login, 0),
@@ -117,15 +117,17 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                                   utils::FormatTimestampToString(trade.close_time),
                                   trade.comment,
                                   utils::TruncateDouble(trade.profit * multiplier, 2),
-                                  "USD",
+                                  currency,
                                   account.group});
         }
     }
 
     // Total row
     JSONArray totals_array;
-    totals_array.emplace_back(
-        JSONObject{{"profit", utils::TruncateDouble(usd_total_profit, 2)}, {"currency", "USD"}});
+    for (const auto& [currency, profit] : total_profit_map) {
+        totals_array.emplace_back(
+            JSONObject{{"profit", utils::TruncateDouble(profit, 2)}, {"currency", currency}});
+    }
 
     table_builder.SetTotalData(totals_array);
 

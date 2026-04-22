@@ -5,6 +5,7 @@
 #include <atomic>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 
 #include "rapidjson/document.h"
 #include "ReportServerInterface.h"
