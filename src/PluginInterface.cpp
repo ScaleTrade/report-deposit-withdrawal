@@ -81,6 +81,7 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     table_builder.AddColumn({"comment", "COMMENT", 6, search_filter});
     table_builder.AddColumn({"profit", "AMOUNT", 7, search_filter});
     table_builder.AddColumn({"currency", "CURRENCY", 8, search_filter});
+    table_builder.AddColumn({"group", "GROUP", 8, search_filter});
 
     for (const auto& trade : trades_vector) {
         if (trade.cmd == ReportTradeCommand::BalanceIn ||
@@ -116,7 +117,8 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                                   utils::FormatTimestampToString(trade.close_time),
                                   trade.comment,
                                   utils::TruncateDouble(trade.profit * multiplier, 2),
-                                  "USD"});
+                                  "USD",
+                                  account.group});
         }
     }
 
