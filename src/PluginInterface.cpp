@@ -4,6 +4,10 @@
 
 using namespace ast;
 
+extern "C" int GetReportApiVersion() {
+    return ReportServerInterface::GetApiVersion();
+}
+
 extern "C" void AboutReport(rapidjson::Value&                   request,
                             rapidjson::Value&                   response,
                             rapidjson::Document::AllocatorType& allocator,
