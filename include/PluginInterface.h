@@ -5,6 +5,7 @@
 #include <atomic>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <unordered_map>
 
 #include "rapidjson/document.h"
@@ -13,6 +14,8 @@
 #include "sbxTableBuilder/SBXTableBuilder.hpp"
 #include "structures/ReportType.h"
 #include "utils/Utils.h"
+
+using namespace ast;
 
 extern "C" {
     int GetReportApiVersion();

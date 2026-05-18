@@ -1,9 +1,5 @@
 #include "PluginInterface.h"
 
-#include <iomanip>
-
-using namespace ast;
-
 extern "C" int GetReportApiVersion() {
     return ReportServerInterface::GetApiVersion();
 }
