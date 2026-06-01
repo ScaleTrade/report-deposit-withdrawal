@@ -28,6 +28,14 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Value&                   response,
                              rapidjson::Document::AllocatorType& allocator,
                              ReportServerInterface*              server) {
+
+    // Test log
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    request.Accept(writer);
+
+    std::cout << "REQUEST RAW: " << buffer.GetString() << std::endl;
+
     std::string group_mask;
     int         from;
     int         to;
