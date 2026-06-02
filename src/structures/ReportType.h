@@ -5,7 +5,7 @@ enum class ReportType {
     Range,            // report filter with time range
     Daily,            // report filter by one day
     Account,          // report filter by account
-    Symbol,           // report filter by account
+    Symbol,           // report filter by symbol
     Group,            // report filter with group mask
     RangeGroup,       // report filter one day and group mask
     DailyGroup,       // report filter one day and group mask

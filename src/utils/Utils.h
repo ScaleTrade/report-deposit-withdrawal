@@ -3,11 +3,13 @@
 #include <cmath>
 #include <ctime>
 #include <iomanip>
+#include <set>
 #include <sstream>
 #include <string>
 
 #include "ReportServerInterface.h"
 #include "ast/Ast.hpp"
+#include "structures/ValidationResult.h"
 
 using namespace ast;
 
@@ -25,4 +27,12 @@ namespace utils {
                                        const std::string&                    group_name);
 
     std::string ConvertCmdToString(const int cmd);
+
+    std::string Trim(const std::string& str);
+
+    std::set<std::string> SplitToSet(const std::string& str);
+
+    void WriteAccessError(const ValidationResult&             validation_result,
+                          rapidjson::Value&                   response,
+                          rapidjson::Document::AllocatorType& allocator);
 } // namespace utils

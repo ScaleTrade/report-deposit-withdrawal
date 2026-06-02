@@ -1,5 +1,7 @@
 #include "PluginInterface.h"
 
+#include "validators/RequestValidator.h"
+
 extern "C" int GetReportApiVersion() {
     return ReportServerInterface::GetApiVersion();
 }
@@ -29,26 +31,26 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                              rapidjson::Document::AllocatorType& allocator,
                              ReportServerInterface*              server) {
 
-    // Test log
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    request.Accept(writer);
+    // Validation
+    const ReportType       report_type = ReportType::RangeGroup;
+    const ValidationResult validation_result =
+        RequestValidator::ValidateRequest(report_type, request);
 
-    std::cout << "REQUEST RAW: " << buffer.GetString() << std::endl;
+    if (!validation_result.allowed) {
+        utils::WriteAccessError(validation_result, response, allocator);
 
-    std::string group_mask;
-    int         from;
-    int         to;
+        std::cerr << "[DepositWithdrawalReportInterface]: " << validation_result.code
+                  << ", message: " << validation_result.message << std::endl;
+        return;
+    }
 
-    if (request.HasMember("group") && request["group"].IsString()) {
-        group_mask = request["group"].GetString();
-    }
-    if (request.HasMember("from") && request["from"].IsNumber()) {
-        from = request["from"].GetInt();
-    }
-    if (request.HasMember("to") && request["to"].IsNumber()) {
-        to = request["to"].GetInt();
-    }
+    std::cout << "[DepositWithdrawalReportInterface]: " << validation_result.code
+              << ", message: " << validation_result.message << std::endl;
+
+    // Execution
+    std::string group_mask = request["group"].GetString();
+    int         from       = request["from"].GetInt();
+    int         to         = request["to"].GetInt();
 
     std::vector<ReportTradeRecord>          trades_vector;
     std::vector<ReportGroupRecord>          groups_vector;
