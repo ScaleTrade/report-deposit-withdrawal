@@ -32,7 +32,4 @@ namespace utils {
 
     std::set<std::string> SplitToSet(const std::string& str);
 
-    void WriteAccessError(const ValidationResult&             validation_result,
-                          rapidjson::Value&                   response,
-                          rapidjson::Document::AllocatorType& allocator);
 } // namespace utils
