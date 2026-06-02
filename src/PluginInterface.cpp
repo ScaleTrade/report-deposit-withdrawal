@@ -48,9 +48,11 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
               << ", message: " << validation_result.message << std::endl;
 
     // Execution
-    std::string group_mask = request["group"].GetString();
-    int         from       = request["from"].GetInt();
-    int         to         = request["to"].GetInt();
+    std::string requested_group_mask = request["group"].GetString();
+    int         from                 = request["from"].GetInt();
+    int         to                   = request["to"].GetInt();
+    std::string allowed_group_mask   = request["__access"]["groups"].GetString();
+    std::string group_mask = requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
 
     std::vector<ReportTradeRecord>          trades_vector;
     std::vector<ReportGroupRecord>          groups_vector;
