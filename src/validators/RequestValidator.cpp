@@ -75,12 +75,66 @@ ValidationResult RequestValidator::ValidateRange(const rapidjson::Value& request
     return result;
 }
 
-ValidationResult RequestValidator::ValidateDaily(const rapidjson::Value& request,
-                                                 ReportServerInterface*  server) {
+ValidationResult RequestValidator::ValidateDailyGroup(const rapidjson::Value& request,
+                                                      ReportServerInterface*  server) {
     ValidationResult result;
+
+    if (!request.HasMember("group") || !request["group"].IsString()) {
+        result.allowed = false;
+        result.code    = 400;
+        result.message = "ValidateDailyGroup: missing or invalid 'group'";
+        return result;
+    }
+
+    if (!request.HasMember("from") || !request["from"].IsNumber()) {
+        result.allowed = false;
+        result.code    = 400;
+        result.message = "ValidateDailyGroup: missing or invalid 'from'";
+        return result;
+    }
+
+    if (!request.HasMember("to") || !request["to"].IsNumber()) {
+        result.allowed = false;
+        result.code    = 400;
+        result.message = "ValidateDailyGroup: missing or invalid 'to'";
+        return result;
+    }
+
+    const std::string group = request["group"].GetString();
+
+    if (group == "*") {
+        result.allowed = true;
+        result.code    = 200;
+        result.message = "ValidateDailyGroup: access granted (all groups)";
+        return result;
+    }
+
+    const rapidjson::Value& access = request["__access"];
+    const std::string       groups = access["groups"].GetString();
+
+    if (groups == "*") {
+        result.allowed = true;
+        result.code    = 200;
+        result.message = "ValidateDailyGroup: access granted (user has all groups)";
+        return result;
+    }
+
+    const std::set<std::string> allowed_groups   = utils::SplitToSet(groups);
+    const std::set<std::string> requested_groups = utils::SplitToSet(group);
+
+    for (const std::string& requested_group : requested_groups) {
+        if (allowed_groups.find(requested_group) == allowed_groups.end()) {
+            result.allowed = false;
+            result.code    = 403;
+            result.message =
+                "ValidateDailyGroup: access denied for group '" + requested_group + "'";
+            return result;
+        }
+    }
+
     result.allowed = true;
     result.code    = 200;
-    result.message = "Daily: access granted (stub)";
+    result.message = "ValidateDailyGroup: access granted";
     return result;
 }
 
@@ -174,66 +228,27 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     return result;
 }
 
-ValidationResult RequestValidator::ValidateDailyGroup(const rapidjson::Value& request,
+ValidationResult RequestValidator::ValidateDaily(const rapidjson::Value& request,
                                                       ReportServerInterface*  server) {
     ValidationResult result;
-
-    if (!request.HasMember("group") || !request["group"].IsString()) {
-        result.allowed = false;
-        result.code    = 400;
-        result.message = "ValidateDailyGroup: missing or invalid 'group'";
-        return result;
-    }
 
     if (!request.HasMember("from") || !request["from"].IsNumber()) {
         result.allowed = false;
         result.code    = 400;
-        result.message = "ValidateDailyGroup: missing or invalid 'from'";
+        result.message = "ValidateDaily: missing or invalid 'from'";
         return result;
     }
 
     if (!request.HasMember("to") || !request["to"].IsNumber()) {
         result.allowed = false;
         result.code    = 400;
-        result.message = "ValidateDailyGroup: missing or invalid 'to'";
+        result.message = "ValidateDaily: missing or invalid 'to'";
         return result;
-    }
-
-    const std::string group = request["group"].GetString();
-
-    if (group == "*") {
-        result.allowed = true;
-        result.code    = 200;
-        result.message = "ValidateDailyGroup: access granted (all groups)";
-        return result;
-    }
-
-    const rapidjson::Value& access = request["__access"];
-    const std::string       groups = access["groups"].GetString();
-
-    if (groups == "*") {
-        result.allowed = true;
-        result.code    = 200;
-        result.message = "ValidateDailyGroup: access granted (user has all groups)";
-        return result;
-    }
-
-    const std::set<std::string> allowed_groups   = utils::SplitToSet(groups);
-    const std::set<std::string> requested_groups = utils::SplitToSet(group);
-
-    for (const std::string& requested_group : requested_groups) {
-        if (allowed_groups.find(requested_group) == allowed_groups.end()) {
-            result.allowed = false;
-            result.code    = 403;
-            result.message =
-                "ValidateDailyGroup: access denied for group '" + requested_group + "'";
-            return result;
-        }
     }
 
     result.allowed = true;
     result.code    = 200;
-    result.message = "ValidateDailyGroup: access granted";
+    result.message = "ValidateDaily: access granted";
     return result;
 }
 
