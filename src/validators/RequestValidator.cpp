@@ -119,7 +119,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     if (group == "*") {
         result.allowed = true;
         result.code    = 200;
-        result.message = "RangeGroup: access granted (all groups)";
+        result.message = "ValidateRangeGroup: access granted (all groups)";
         return result;
     }
 
