@@ -61,7 +61,8 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     std::string group_mask =
         requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
 
-    std::cout << "[DepositWithdrawalReportInterface]: group_mask: " << group_mask << std::endl;
+    std::cout << "[DepositWithdrawalReportInterface]: " << validation_result.code
+              << ", message: " << validation_result.message << std::endl;
 
     std::vector<ReportTradeRecord>          trades_vector;
     std::vector<ReportGroupRecord>          groups_vector;
