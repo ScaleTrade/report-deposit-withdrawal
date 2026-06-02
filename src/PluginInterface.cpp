@@ -1,7 +1,5 @@
 #include "PluginInterface.h"
 
-#include "validators/RequestValidator.h"
-
 extern "C" int GetReportApiVersion() {
     return ReportServerInterface::GetApiVersion();
 }
@@ -32,9 +30,9 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
                              ReportServerInterface*              server) {
 
     // Validation
-    const ReportType       report_type = ReportType::RangeGroup;
+    constexpr ReportType   report_type = ReportType::RangeGroup;
     const ValidationResult validation_result =
-        RequestValidator::ValidateRequest(report_type, request);
+        RequestValidator::ValidateRequest(report_type, request, server);
 
     if (!validation_result.allowed) {
         utils::WriteAccessError(validation_result, response, allocator);
@@ -52,7 +50,8 @@ extern "C" void CreateReport(rapidjson::Value&                   request,
     int         from                 = request["from"].GetInt();
     int         to                   = request["to"].GetInt();
     std::string allowed_group_mask   = request["__access"]["groups"].GetString();
-    std::string group_mask = requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
+    std::string group_mask =
+        requested_group_mask == "*" ? allowed_group_mask : requested_group_mask;
 
     std::cout << "[DepositWithdrawalReportInterface]: group_mask: " << group_mask << std::endl;
 

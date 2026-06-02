@@ -10,6 +10,7 @@
 
 #include "rapidjson/document.h"
 #include "ReportServerInterface.h"
+#include "validators/RequestValidator.h"
 #include "ast/Ast.hpp"
 #include "sbxTableBuilder/SBXTableBuilder.hpp"
 #include "structures/ReportType.h"
