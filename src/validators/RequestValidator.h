@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 
-
 #include "ReportServerInterface.h"
 #include "rapidjson/document.h"
 #include "structures/ReportType.h"

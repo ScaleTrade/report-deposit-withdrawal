@@ -149,7 +149,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
         return result;
     }
 
-    const rapidjson::Value& access = request["__access"];
+    const rapidjson::Value& access        = request["__access"];
     const std::string       access_groups = access["groups"].GetString();
 
     int match_result = 0;
@@ -178,7 +178,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
 }
 
 ValidationResult RequestValidator::ValidateGroup(const rapidjson::Value& request,
-                                                      ReportServerInterface*  server) {
+                                                 ReportServerInterface*  server) {
     ValidationResult result;
 
     if (!request.HasMember("group") || !request["group"].IsString()) {
@@ -195,7 +195,7 @@ ValidationResult RequestValidator::ValidateGroup(const rapidjson::Value& request
 }
 
 ValidationResult RequestValidator::ValidateDaily(const rapidjson::Value& request,
-                                                      ReportServerInterface*  server) {
+                                                 ReportServerInterface*  server) {
     ValidationResult result;
 
     if (!request.HasMember("from") || !request["from"].IsNumber()) {
