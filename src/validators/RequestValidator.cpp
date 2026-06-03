@@ -154,7 +154,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
 
     int match_result = 0;
     try {
-        match_result = server->MatchWildCardGroup(request["group"].GetString(), access_groups);
+        match_result = server->MatchWildCardGroup(access_groups, request["group"].GetString());
     } catch (const std::exception& e) {
         result.allowed = false;
         result.code    = 404;
