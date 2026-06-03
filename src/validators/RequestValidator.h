@@ -1,6 +1,8 @@
 #pragma once
 
+#include <iostream>
 #include <string>
+
 
 #include "ReportServerInterface.h"
 #include "rapidjson/document.h"

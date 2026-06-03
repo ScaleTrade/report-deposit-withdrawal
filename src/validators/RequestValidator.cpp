@@ -149,6 +149,28 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
         return result;
     }
 
+    const rapidjson::Value& access = request["__access"];
+    const std::string       access_groups = access["groups"].GetString();
+
+    int match_result = 0;
+    try {
+        match_result = server->MatchWildCardGroup(request["group"].GetString(), access_groups);
+    } catch (const std::exception& e) {
+        result.allowed = false;
+        result.code    = 404;
+        result.message = "ValidateRangeAccount: MatchWildCardGroup error";
+        return result;
+    }
+
+    std::cout << "MatchWildCardGroup: " << match_result << std::endl;
+
+    if (match_result != 0) {
+        result.allowed = false;
+        result.code    = 403;
+        result.message = "ValidateRangeGroup: access denied (group does not match required mask)";
+        return result;
+    }
+
     result.allowed = true;
     result.code    = 200;
     result.message = "ValidateRangeGroup: access granted";
