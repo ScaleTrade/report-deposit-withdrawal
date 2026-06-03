@@ -152,6 +152,14 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     const rapidjson::Value& access        = request["__access"];
     const std::string       access_groups = access["groups"].GetString();
 
+    const std::string requested_groups = request["group"].GetString();
+    if (requested_groups == "*") {
+        result.allowed = true;
+        result.code    = 200;
+        result.message = "ValidateRangeAccount: the user will receive all his groups";
+        return result;
+    }
+
     int match_result = 0;
     try {
         match_result = server->MatchWildCardGroup(access_groups, request["group"].GetString());
