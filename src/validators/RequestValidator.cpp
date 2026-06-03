@@ -100,6 +100,36 @@ ValidationResult RequestValidator::ValidateDailyGroup(const rapidjson::Value& re
         return result;
     }
 
+    const std::string requested_groups = request["group"].GetString();
+    if (requested_groups == "*") {
+        result.allowed = true;
+        result.code    = 200;
+        result.message = "ValidateDailyGroup: the user wants to get all of HIS GROUPS";
+        return result;
+    }
+
+    const rapidjson::Value& access        = request["__access"];
+    const std::string       access_groups = access["groups"].GetString();
+
+    int match_result = 0;
+    try {
+        match_result = server->MatchWildCardGroup(access_groups, request["group"].GetString());
+    } catch (const std::exception& e) {
+        result.allowed = false;
+        result.code    = 404;
+        result.message = "ValidateDailyGroup: MatchWildCardGroup error";
+        return result;
+    }
+
+    std::cout << "MatchWildCardGroup: " << match_result << std::endl;
+
+    if (match_result != 0) {
+        result.allowed = false;
+        result.code    = 403;
+        result.message = "ValidateDailyGroup: access denied (group does not match required mask)";
+        return result;
+    }
+
     result.allowed = true;
     result.code    = 200;
     result.message = "ValidateDailyGroup: access granted";
@@ -156,7 +186,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     if (requested_groups == "*") {
         result.allowed = true;
         result.code    = 200;
-        result.message = "ValidateRangeAccount: the user will receive all his groups";
+        result.message = "ValidateRangeGroup: the user wants to get all of HIS GROUPS";
         return result;
     }
 
@@ -166,7 +196,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     } catch (const std::exception& e) {
         result.allowed = false;
         result.code    = 404;
-        result.message = "ValidateRangeAccount: MatchWildCardGroup error";
+        result.message = "ValidateRangeGroup: MatchWildCardGroup error";
         return result;
     }
 
@@ -193,6 +223,36 @@ ValidationResult RequestValidator::ValidateGroup(const rapidjson::Value& request
         result.allowed = false;
         result.code    = 400;
         result.message = "ValidateGroup: missing or invalid 'group'";
+        return result;
+    }
+
+    const std::string requested_groups = request["group"].GetString();
+    if (requested_groups == "*") {
+        result.allowed = true;
+        result.code    = 200;
+        result.message = "ValidateGroup: the user wants to get all of HIS GROUPS";
+        return result;
+    }
+
+    const rapidjson::Value& access        = request["__access"];
+    const std::string       access_groups = access["groups"].GetString();
+
+    int match_result = 0;
+    try {
+        match_result = server->MatchWildCardGroup(access_groups, request["group"].GetString());
+    } catch (const std::exception& e) {
+        result.allowed = false;
+        result.code    = 404;
+        result.message = "ValidateGroup: MatchWildCardGroup error";
+        return result;
+    }
+
+    std::cout << "MatchWildCardGroup: " << match_result << std::endl;
+
+    if (match_result != 0) {
+        result.allowed = false;
+        result.code    = 403;
+        result.message = "ValidateGroup: access denied (group does not match required mask)";
         return result;
     }
 
