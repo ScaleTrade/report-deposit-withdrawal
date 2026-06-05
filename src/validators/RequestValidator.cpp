@@ -193,6 +193,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     std::set<std::string> groups_set = utils::SplitToSet(requested_groups);
 
     for (const auto& group : groups_set) {
+        std::cout << "group: '" << group << "': " << group << std::endl;
         int match_result = 0;
         try {
             match_result = server->MatchWildCardGroup(access_groups, group);
