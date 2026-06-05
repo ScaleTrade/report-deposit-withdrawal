@@ -194,9 +194,11 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
 
     for (const auto& group : groups_set) {
         std::cout << "group: '" << group << "': " << group << std::endl;
+
         int match_result = 0;
         try {
             match_result = server->MatchWildCardGroup(access_groups, group);
+            std::cout << "match_result: '" << match_result << "': " << group << std::endl;
         } catch (const std::exception& e) {
             result.allowed = false;
             result.code    = 404;
