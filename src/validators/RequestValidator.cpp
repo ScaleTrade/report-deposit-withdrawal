@@ -193,12 +193,9 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
     std::set<std::string> groups_set = utils::SplitToSet(requested_groups);
 
     for (const auto& group : groups_set) {
-        std::cout << "group: '" << group << "': " << group << std::endl;
-
         int match_result = 0;
         try {
             match_result = server->MatchWildCardGroup(access_groups, group);
-            std::cout << "match_result: '" << match_result << "': " << group << std::endl;
         } catch (const std::exception& e) {
             result.allowed = false;
             result.code    = 404;
@@ -213,8 +210,6 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
             result.message = "ValidateRangeGroup: access denied for group: " + group;
             return result;
         }
-
-        std::cout << "MatchWildCardGroup for group '" << group << "': " << match_result << std::endl;
     }
 
     // Все группы прошли проверку
