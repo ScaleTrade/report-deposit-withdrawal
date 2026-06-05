@@ -207,7 +207,7 @@ ValidationResult RequestValidator::ValidateRangeGroup(const rapidjson::Value& re
         }
 
         // Если хотя бы одна группа не прошла проверку
-        if (match_result <= 0) {
+        if (match_result != 0) {
             result.allowed = false;
             result.code    = 403;
             result.message = "ValidateRangeGroup: access denied for group: " + group;
